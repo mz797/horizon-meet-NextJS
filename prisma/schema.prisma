@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  password      String
+  role          Role           @default(USER)
+  registrations Registration[]
+  events        Event[]        @relation("Organizer")
+  createdAt     DateTime       @default(now())
+}
+
+model Event {
+  id           String         @id @default(uuid())
+  title        String
+  description  String
+  date         DateTime
+  image        String
+  organizerId  String
+  organizer    User           @relation("Organizer", fields: [organizerId], references: [id])
+  registration Registration[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now())
+}
+
+model Registration {
+  id        String   @id @default(uuid())
+  userId    String
+  eventId   String
+  user      User     @relation(fields: [userId], references: [id])
+  event     Event    @relation(fields: [eventId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@unique([userId, eventId]) // Zapobiega wielokrotnej rejestracji tego samego użytkownika na to samo wydarzenie
+}
+
+// npx prisma db push po zmianie schemy
