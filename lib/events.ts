@@ -1,6 +1,7 @@
 "use server";
 
 import fs from "node:fs";
+import path from "node:path";
 import slugify from "slugify";
 import { prisma } from "./prisma";
 import { verifySession } from "./dal";
@@ -44,6 +45,63 @@ export const createEvent = async (event: any) => {
   });
 
   return { success: true };
+};
+
+export const editEvent = async (updatedEvent: any, eventId: string) => {
+  try {
+    const { userId } = await verifySession();
+
+    if (!userId) new Error("Not authenticated");
+
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!event) {
+      new Error("This event doesen't exist");
+      return;
+    }
+
+    const slug = slugify(updatedEvent.title, { lower: true });
+    const extention = updatedEvent.image.name.split(".").pop();
+    const fileName = `${slug}-${Math.random() * 100}.${extention}`;
+
+    const stream = fs.createWriteStream(`public/images/${fileName}`);
+    const bufferedImage = await updatedEvent.image.arrayBuffer();
+
+    stream.write(Buffer.from(bufferedImage), (err) => {
+      if (err) {
+        throw new Error("Saving image failed");
+      }
+    });
+
+    const imagePath = path.join(
+      process.cwd(),
+      "public",
+      "images",
+      path.basename(event.image)
+    );
+
+    console.log("imagePath", imagePath);
+
+    fs.unlink(imagePath, function (err) {
+      console.log(2, err);
+      new Error("Can not remove previous image");
+    });
+
+    updatedEvent.image = `/images/${fileName}`;
+
+    await prisma.event.update({
+      where: { id: eventId },
+      data: {
+        ...updatedEvent,
+        date: new Date(updatedEvent.date),
+      },
+    });
+    return { success: true };
+  } catch (err) {
+    throw err;
+  }
 };
 
 export const registerToEvent = async (eventId: string, userId: string) => {

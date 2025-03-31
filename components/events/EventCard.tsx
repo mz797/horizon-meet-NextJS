@@ -11,7 +11,7 @@ type Props = {
 
 function EventCard({ id, title, date, image }: Props) {
   return (
-    <div className="flex flex-col w-full h-full -white border border-gray-200 rounded-lg shadow-sm bg-gray-100 ">
+    <div className="flex flex-col w-full h-full overflow-hidden border border-gray-200 rounded-lg shadow-sm bg-gray-100 ">
       <div className="relative h-60">
         <Image
           className="object-cover"

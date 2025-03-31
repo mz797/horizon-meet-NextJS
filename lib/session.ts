@@ -18,13 +18,14 @@ export const encrypt = async (payload: {
 };
 
 export const decrypt = async (session: string | undefined = "") => {
+  // console.log(session);
   try {
     const { payload } = await jwtVerify(session, encodedKey, {
       algorithms: ["HS256"],
     });
     return payload;
   } catch (err) {
-    console.log(err);
+    console.log("dupa", err);
     console.log("Failed to verify session");
   }
 };
