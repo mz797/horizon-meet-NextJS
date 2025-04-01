@@ -9,9 +9,7 @@ async function EditEventPage({ params }: { params: { eventId: string } }) {
 
   if (!event) return notFound();
 
-  const response = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}${event.image}`
-  );
+  const response = await fetch(`${event.image}`);
   const blob = await response.blob();
   const file = new File([blob], "juwenalia.jpg", { type: blob.type });
 

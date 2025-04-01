@@ -38,7 +38,7 @@ const UpdateEventForm = ({ event }: { event: createEventSchemaType }) => {
     } else {
       setValue("image", event.image, { shouldValidate: true });
     }
-  }, [event.image, setValue]);
+  }, [event.image]);
   const onSubmit = async (data: createEventSchemaType) => {
     const res = await editEvent(data, params.eventId);
     if (res?.success) {
@@ -48,11 +48,11 @@ const UpdateEventForm = ({ event }: { event: createEventSchemaType }) => {
 
   return (
     <div className="px-4 md:px-8 flex flex-col justify-center items-center">
+      <h1 className="text-5xl mt-8 text-center">Create event</h1>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col justify-center items-center h-screen max-w-lg  w-full md:min-w-lg md:px-8"
+        className="flex flex-col justify-center items-center  max-w-lg  w-full md:min-w-lg md:px-8"
       >
-        <h1 className="text-5xl mb-8">Create event</h1>
         <div className="form-container w-full">
           <label htmlFor="title" className="label">
             Title

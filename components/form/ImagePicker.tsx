@@ -19,8 +19,7 @@ export default function ImagePicker({
   };
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event?.target?.files?.[0];
-    console.log("IS FILE?", file instanceof File);
-    console.log(file);
+
     if (!file) {
       setPickedImage(null);
       setValue(name, undefined, { shouldValidate: true });
@@ -45,8 +44,18 @@ export default function ImagePicker({
       <label htmlFor={name} className="label">
         {label}
       </label>
-      <div className="flex items-start gap-6 mb-4">
-        <div className="w-40 h-40 border border-gray-900 flex justify-center items-center text-center text-gray-900 relative">
+      <div className="flex flex-col gap-6 mb-4">
+        <button
+          className="btn text-gray-950 border-2 border-gray-950 bg-white hover:bg-gray-900 hover:text-white "
+          type="button"
+          onClick={handlePickCick}
+        >
+          Pick an Image
+        </button>
+        <div
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg min-w-60 w-full h-40 overflow-hidden relative flex justify-center items-center"
+          // className="w-full h-40 border border-gray-900 flex justify-center items-center text-center text-gray-900 relative"
+        >
           {!pickedImage && <p className="p-4 m-0 ">No image picked yet</p>}
           {pickedImage && (
             <Image
@@ -67,13 +76,6 @@ export default function ImagePicker({
           onChange={handleImageChange}
           required
         />
-        <button
-          className="border-0 py-2 px-6 bg-amber-50 rounded-xs cursor-pointer hover:bg-amber-100"
-          type="button"
-          onClick={handlePickCick}
-        >
-          Pick an Image
-        </button>
       </div>
     </div>
   );

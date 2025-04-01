@@ -7,7 +7,10 @@ import { prisma } from "./prisma";
 import { verifySession } from "./dal";
 
 export const getEvents = async () => {
-  return await prisma.event.findMany();
+  return await prisma.event.findMany({
+    skip: 10,
+    take: 10,
+  });
 };
 
 export const getEventById = async (id: string) => {
@@ -100,6 +103,53 @@ export const editEvent = async (updatedEvent: any, eventId: string) => {
     });
     return { success: true };
   } catch (err) {
+    throw err;
+  }
+};
+
+export const deleteEventById = async (eventId: string) => {
+  console.log("Deleting event:", eventId);
+
+  if (!eventId) {
+    throw new Error("Invalid event ID");
+  }
+
+  try {
+    const session = await verifySession();
+    console.log("SESSION:", session);
+
+    if (!session || !session.userId) {
+      throw new Error("Not authenticated");
+    }
+
+    const { userId } = session;
+
+    const event = await prisma.event.findUnique({
+      where: { id: eventId },
+    });
+    console.log("EVENT:", event);
+
+    if (!event) {
+      throw new Error("Event doesn't exist");
+    }
+    if (!event.organizerId) {
+      throw new Error("Invalid event data");
+    }
+    if (event.organizerId !== userId) {
+      throw new Error("Not authorized");
+    }
+
+    await prisma.registration.deleteMany({
+      where: { eventId },
+    });
+
+    await prisma.event.delete({
+      where: { id: eventId },
+    });
+
+    return { success: true };
+  } catch (err) {
+    console.error("deleteEventById Error:", err);
     throw err;
   }
 };

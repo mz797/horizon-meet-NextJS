@@ -8,8 +8,8 @@
 @theme inline {
     --color-background: var(--background);
     --color-foreground: var(--foreground);
-    --font-sans: var(--font-geist-sans);
-    --font-mono: var(--font-geist-mono);
+    /*--font-sans: var(--font-geist-sans);*/
+    /*--font-mono: var(--font-geist-mono);*/
 }
 
 @media (prefers-color-scheme: light) {
@@ -27,11 +27,11 @@ body {
 
 @layer components {
     .form-container {
-        @apply mb-2;
+        @apply mb-2 w-full;
     }
 
     .label {
-        @apply block mb-2 text-sm font-medium text-gray-900;
+        @apply block mb-2 text-sm font-medium text-gray-900 ;
     }
 
     .label-invalid {
@@ -51,6 +51,6 @@ body {
     }
 
     .btn {
-        @apply text-white bg-gray-800 hover:bg-gray-950 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center
+        @apply cursor-pointer text-white bg-gray-800 hover:bg-gray-950 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center
     }
 }
