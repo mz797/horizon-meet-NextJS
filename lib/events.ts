@@ -6,11 +6,19 @@ import slugify from "slugify";
 import { prisma } from "./prisma";
 import { verifySession } from "./dal";
 
-export const getEvents = async () => {
-  return await prisma.event.findMany({
-    skip: 10,
-    take: 10,
-  });
+export const getEvents = async (payload: {
+  pageNumber: number;
+  rows: number;
+}) => {
+  const [events, count] = await prisma.$transaction([
+    prisma.event.findMany({
+      skip: payload.pageNumber * 10,
+      take: payload.rows,
+    }),
+    prisma.event.count(),
+  ]);
+
+  return { events, count: Math.ceil(count / 10) };
 };
 
 export const getEventById = async (id: string) => {
