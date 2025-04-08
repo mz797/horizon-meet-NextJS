@@ -6,6 +6,13 @@ const prisma = new PrismaClient();
 
 async function main() {
     console.log("Seeding database....");
+    await prisma.user.create({
+        data: {
+            name: "Admin",
+            email: "admin@admin.com",
+            password: 'haslo123'
+        }
+    })
 
     const user = await prisma.user.findFirst();
     if (!user) return;
@@ -14,7 +21,7 @@ async function main() {
         title: faker.lorem.words(5),
         description: faker.lorem.paragraph(),
         date: faker.date.future(),
-        image: faker.image.urlPicsumPhotos(),
+        image: '/images/event.jpg',
         organizerId: user.id,
     }));
 

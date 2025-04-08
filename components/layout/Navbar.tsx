@@ -3,9 +3,11 @@ import { deleteSession } from "src/lib/session";
 import LogoutButton from "./NavbarButton";
 import { redirect } from "next/navigation";
 import { verifySession } from "src/lib/dal";
+import NavbarLink from "src/components/layout/NavbarLink";
 
 async function Navbar() {
   const { userName } = await verifySession();
+
   console.log(userName);
   const handleLogout = async () => {
     "use server";
@@ -27,19 +29,8 @@ async function Navbar() {
             </div>
             <div className="hidden sm:ml-6 sm:block">
               <div className="flex space-x-4">
-                <a
-                  href="/events"
-                  className="rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white"
-                  aria-current="page"
-                >
-                  Events
-                </a>
-                <a
-                  href="/registrations"
-                  className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-                >
-                  Registrations
-                </a>
+                <NavbarLink href="/events">Events</NavbarLink>
+                <NavbarLink href="/registrations">Registrations</NavbarLink>
               </div>
             </div>
           </div>

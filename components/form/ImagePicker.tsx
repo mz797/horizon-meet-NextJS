@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useRef, useState } from "react";
 import Image from "next/image";
 
@@ -11,31 +12,34 @@ export default function ImagePicker({
   name: string;
   setValue: any;
 }) {
-  const [pickedImage, setPickedImage] = useState();
+  const [pickedImage, setPickedImage] = useState<string | null>(null); // Typowanie pickedImage
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handlePickCick = () => {
+  const handleClick = () => {
     inputRef?.current?.click();
   };
+
   const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event?.target?.files?.[0];
 
     if (!file) {
       setPickedImage(null);
       setValue(name, undefined, { shouldValidate: true });
-
       return;
     }
+
+    // Ustawiamy file jako wartość
     setValue(name, file, { shouldValidate: true });
+
     const fileReader = new FileReader();
 
-    fileReader.readAsDataURL(file);
+    fileReader.readAsDataURL(file); // Wczytanie obrazu jako Base64
 
     fileReader.onload = () => {
-      //tutaj znajduje się wynik z readAsDataURL
-      setPickedImage(fileReader.result);
-      console.log(1);
-      console.log(fileReader.result);
+      if (fileReader.result) {
+        // Gdy obraz jest załadowany, zapisujemy Base64
+        setPickedImage(fileReader.result as string);
+      }
     };
   };
 
@@ -48,14 +52,11 @@ export default function ImagePicker({
         <button
           className="btn text-gray-950 border-2 border-gray-950 bg-white hover:bg-gray-900 hover:text-white "
           type="button"
-          onClick={handlePickCick}
+          onClick={handleClick}
         >
           Pick an Image
         </button>
-        <div
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg min-w-60 w-full h-40 overflow-hidden relative flex justify-center items-center"
-          // className="w-full h-40 border border-gray-900 flex justify-center items-center text-center text-gray-900 relative"
-        >
+        <div className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg min-w-60 w-full h-40 overflow-hidden relative flex justify-center items-center">
           {!pickedImage && <p className="p-4 m-0 ">No image picked yet</p>}
           {pickedImage && (
             <Image

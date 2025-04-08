@@ -1,10 +1,10 @@
 import Link from "next/link";
 import React, { Suspense } from "react";
 
-import EventsGrid from "src/components/events/EventsGrid";
-import { getEvents } from "src/lib/events";
 import Pagination from "src/components/pagination/Pagination";
+import { getEvents } from "src/lib/events";
 import { redirect } from "next/navigation";
+import EventsGrid from "src/components/events/EventsGrid";
 
 async function Events({
   searchParams,
@@ -22,7 +22,7 @@ async function Events({
   });
   if (
     !sParams?.count ||
-    sParams?.count != count ||
+    sParams?.count !== count.toString() ||
     !["10", "25", "50", "100"].includes(sParams?.rows || "")
   ) {
     redirect(

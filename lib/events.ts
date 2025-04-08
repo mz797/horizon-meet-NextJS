@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import slugify from "slugify";
+import cloudinary from "cloudinary";
 import { prisma } from "./prisma";
 import { verifySession } from "./dal";
 
@@ -20,7 +21,6 @@ export const getEvents = async (payload: {
 
   return { events, count: Math.ceil(count / 10) };
 };
-
 export const getEventById = async (id: string) => {
   return await prisma.event.findFirst({
     where: { id },
@@ -36,20 +36,25 @@ export const createEvent = async (event: any) => {
 
   if (!userId) throw new Error("Not authenticated");
 
-  const slug = slugify(event.title, { lower: true });
-  const extention = event.image.name.split(".").pop();
-  const fileName = `${slug}-${Math.random() * 100}.${extention}`;
+  if (!event.image) throw new Error("No image picked");
 
-  const stream = fs.createWriteStream(`public/images/${fileName}`);
-  const bufferedImage = await event.image.arrayBuffer();
+  const formData = new FormData();
+  formData.append("file", event.image);
+  const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+  formData.append("upload_preset", preset as string); // Your Cloudinary upload preset
 
-  stream.write(Buffer.from(bufferedImage), (err) => {
-    if (err) {
-      throw new Error("Saving image failed");
+  // Send the FormData to Cloudinary (using fetch or axios)
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+    {
+      method: "POST",
+      body: formData,
     }
-  });
+  );
 
-  event.image = `/images/${fileName}`;
+  const data = await res.json();
+  console.log(data);
+  event.image = data.secure_url;
 
   await prisma.event.create({
     data: { ...event, date: new Date(event.date), organizerId: userId },
@@ -73,34 +78,36 @@ export const editEvent = async (updatedEvent: any, eventId: string) => {
       return;
     }
 
-    const slug = slugify(updatedEvent.title, { lower: true });
-    const extention = updatedEvent.image.name.split(".").pop();
-    const fileName = `${slug}-${Math.random() * 100}.${extention}`;
-
-    const stream = fs.createWriteStream(`public/images/${fileName}`);
-    const bufferedImage = await updatedEvent.image.arrayBuffer();
-
-    stream.write(Buffer.from(bufferedImage), (err) => {
-      if (err) {
-        throw new Error("Saving image failed");
-      }
+    cloudinary.v2.config({
+      cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
     });
 
-    const imagePath = path.join(
-      process.cwd(),
-      "public",
-      "images",
-      path.basename(event.image)
+    // Jeśli istnieje stare zdjęcie, usuń je z Cloudinary
+    if (event.image && updatedEvent.image) {
+      // Sprawdzamy, czy zdjęcie zostało zmienione
+      const oldImagePublicId = event?.image?.split("/")?.pop()?.split(".")[0]; // Uzyskujemy public_id z URL
+      if (oldImagePublicId)
+        await cloudinary.v2.uploader.destroy(oldImagePublicId); // Usuwamy stare zdjęcie z Cloudinary
+    }
+
+    const formData = new FormData();
+    formData.append("file", updatedEvent.image);
+    const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+    formData.append("upload_preset", preset as string); // Your Cloudinary upload preset
+
+    // Send the FormData to Cloudinary (using fetch or axios)
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+      {
+        method: "POST",
+        body: formData,
+      }
     );
 
-    console.log("imagePath", imagePath);
-
-    fs.unlink(imagePath, function (err) {
-      console.log(2, err);
-      new Error("Can not remove previous image");
-    });
-
-    updatedEvent.image = `/images/${fileName}`;
+    const data = await res.json();
+    updatedEvent.image = data.secure_url;
 
     await prisma.event.update({
       where: { id: eventId },
