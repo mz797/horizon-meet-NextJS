@@ -10,7 +10,6 @@ import {
 } from "src/lib/events";
 import SubmitButton from "src/components/form/SubmitButton";
 import { revalidatePath } from "next/cache";
-import EventActionButtons from "src/components/events/EventActionButtons";
 import Link from "next/link";
 
 export default async function EventDetailsPage({
@@ -22,7 +21,7 @@ export default async function EventDetailsPage({
   const { userId } = await verifySession();
 
   const event = await getEventById(eventId!);
-  console.log(event);
+  console.log(1, event);
   if (!event) {
     return notFound();
   }

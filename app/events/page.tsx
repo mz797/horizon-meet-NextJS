@@ -4,7 +4,9 @@ import React, { Suspense } from "react";
 import Pagination from "src/components/pagination/Pagination";
 import { getEvents } from "src/lib/events";
 import { redirect } from "next/navigation";
-import EventsGrid from "src/components/events/EventsGrid";
+import dynamic from "next/dynamic";
+
+const EventsGrid = dynamic(() => import("src/components/events/EventsGrid"));
 
 async function Events({
   searchParams,
@@ -23,7 +25,9 @@ async function Events({
   if (
     !sParams?.count ||
     sParams?.count !== count.toString() ||
-    !["10", "25", "50", "100"].includes(sParams?.rows || "")
+    !["10", "50", "100", "1000", "10000", "100000", "1000000"].includes(
+      sParams?.rows || ""
+    )
   ) {
     redirect(
       `/events?page=${Number(sParams?.page) || 0}&count=${count || 1}&rows=${
@@ -44,7 +48,7 @@ async function EventsPage({
   }>;
 }) {
   const params = await searchParams;
-  console.log(params?.page);
+  console.log(2, params?.page);
 
   return (
     <div className="mx-2 my-10 md:mx-10 ">
@@ -52,12 +56,6 @@ async function EventsPage({
         <p className="mb-4 text-4xl font-extrabold text-center leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl ">
           Events
         </p>
-        <Link href={"/events/create"} className="btn">
-          Add event
-        </Link>
-      </div>
-      <Suspense fallback={<p>Featching...</p>}>
-        <Events searchParams={searchParams} />
         <div className="flex items-center justify-center">
           <Pagination
             currentPageNumber={Number(params?.page)}
@@ -65,6 +63,12 @@ async function EventsPage({
             rows={params?.rows}
           />
         </div>
+        <Link href={"/events/create"} className="btn">
+          Add event
+        </Link>
+      </div>
+      <Suspense fallback={<p>Featching...</p>}>
+        <Events searchParams={searchParams} />
       </Suspense>
     </div>
   );

@@ -4,7 +4,11 @@ import { getEventById } from "src/lib/events";
 import { notFound } from "next/navigation";
 import UpdateEventForm from "src/components/events/UpdateEventForm";
 
-async function EditEventPage({ params }: { params: { eventId: string } }) {
+async function EditEventPage({
+  params,
+}: {
+  params: Promise<{ eventId: string }>;
+}) {
   const event = await getEventById((await params).eventId);
 
   if (!event) return notFound();

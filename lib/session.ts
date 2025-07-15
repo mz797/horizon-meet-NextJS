@@ -6,6 +6,14 @@ import { cookies } from "next/headers";
 const secretKey = process.env.SESSION_SECRET;
 const encodedKey = new TextEncoder().encode(secretKey);
 
+export type Session = {
+  user?: {
+    userId: string;
+    userRole: string;
+    name: string;
+  };
+};
+
 export const encrypt = async (payload: {
   user: { userId: string; userRole: string; name: string };
   expiresAt: Date;

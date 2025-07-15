@@ -28,7 +28,7 @@ export const signUp = async (values: signUpSchemaType) => {
       return { errors: { email: ["This email is taken."] } };
     }
   } catch (err) {
-    console.log(err);
+    console.log(6, err);
     throw new Error("Something went wrong");
   }
 
@@ -37,7 +37,7 @@ export const signUp = async (values: signUpSchemaType) => {
       data: { ...values, password: hashedPassword },
     });
   } catch (err) {
-    console.log(err);
+    console.log(7, err);
     throw new Error("Something went wrong");
   }
 

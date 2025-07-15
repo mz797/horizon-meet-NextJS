@@ -1,9 +1,13 @@
 import type { NextConfig } from "next";
 
+const withBundleAnalyzer = require("@next/bundle-analyzer")({
+  enabled: process.env.ANALYZE === "true",
+});
+
 const nextConfig: NextConfig = {
   images: {
-    domains: ["http://localhost:3000", "picsum.photos", "res.cloudinary.com"],
+    domains: ["localhost", "picsum.photos", "res.cloudinary.com"],
   },
 };
 
-export default nextConfig;
+export default withBundleAnalyzer(nextConfig);

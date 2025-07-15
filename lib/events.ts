@@ -1,26 +1,34 @@
 "use server";
 
-import fs from "node:fs";
-import path from "node:path";
-import slugify from "slugify";
 import cloudinary from "cloudinary";
 import { prisma } from "./prisma";
 import { verifySession } from "./dal";
 
-export const getEvents = async (payload: {
-  pageNumber: number;
-  rows: number;
+export const getEvents = async (payload?: {
+  pageNumber?: number;
+  rows?: number;
 }) => {
-  const [events, count] = await prisma.$transaction([
-    prisma.event.findMany({
-      skip: payload.pageNumber * 10,
-      take: payload.rows,
-    }),
-    prisma.event.count(),
-  ]);
+  console.log("payload", payload);
 
-  return { events, count: Math.ceil(count / 10) };
+  const pageNumber = payload?.pageNumber ?? 0;
+  const rows = payload?.rows ?? 10;
+
+  try {
+    const [events, count] = await prisma.$transaction([
+      prisma.event.findMany({
+        skip: pageNumber * rows,
+        take: rows,
+      }),
+      prisma.event.count(),
+    ]);
+
+    return { events, count: Math.ceil(count / rows) };
+  } catch (error) {
+    console.error("Prisma error:", error);
+    return { events: [], count: 0 };
+  }
 };
+
 export const getEventById = async (id: string) => {
   return await prisma.event.findFirst({
     where: { id },
@@ -31,7 +39,12 @@ export const getEventById = async (id: string) => {
   });
 };
 
-export const createEvent = async (event: any) => {
+export const createEvent = async (event: {
+  title: string;
+  description: string;
+  date: string;
+  image: File | string;
+}) => {
   const { userId } = await verifySession();
 
   if (!userId) throw new Error("Not authenticated");
@@ -43,7 +56,6 @@ export const createEvent = async (event: any) => {
   const preset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
   formData.append("upload_preset", preset as string); // Your Cloudinary upload preset
 
-  // Send the FormData to Cloudinary (using fetch or axios)
   const res = await fetch(
     `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
     {
@@ -53,17 +65,31 @@ export const createEvent = async (event: any) => {
   );
 
   const data = await res.json();
-  console.log(data);
+  console.log(9, data);
   event.image = data.secure_url;
 
   await prisma.event.create({
-    data: { ...event, date: new Date(event.date), organizerId: userId },
+    data: {
+      ...event,
+      image: event.image as string,
+      date: new Date(event.date),
+      organizerId: userId,
+      organizer: { connect: { id: userId } },
+    },
   });
 
   return { success: true };
 };
 
-export const editEvent = async (updatedEvent: any, eventId: string) => {
+export const editEvent = async (
+  updatedEvent: {
+    title: string;
+    description: string;
+    date: string;
+    image: File | string;
+  },
+  eventId: string
+) => {
   try {
     const { userId } = await verifySession();
 
@@ -113,6 +139,7 @@ export const editEvent = async (updatedEvent: any, eventId: string) => {
       where: { id: eventId },
       data: {
         ...updatedEvent,
+        image: updatedEvent.image as string,
         date: new Date(updatedEvent.date),
       },
     });
@@ -134,7 +161,7 @@ export const deleteEventById = async (eventId: string) => {
     console.log("SESSION:", session);
 
     if (!session || !session.userId) {
-      throw new Error("Not authenticated");
+      new Error("Not authenticated");
     }
 
     const { userId } = session;
@@ -145,13 +172,11 @@ export const deleteEventById = async (eventId: string) => {
     console.log("EVENT:", event);
 
     if (!event) {
-      throw new Error("Event doesn't exist");
-    }
-    if (!event.organizerId) {
-      throw new Error("Invalid event data");
-    }
-    if (event.organizerId !== userId) {
-      throw new Error("Not authorized");
+      new Error("Event doesn't exist");
+    } else if (!event.organizerId) {
+      new Error("Invalid event data");
+    } else if (event.organizerId !== userId) {
+      new Error("Not authorized");
     }
 
     await prisma.registration.deleteMany({
@@ -183,7 +208,7 @@ export const registerToEvent = async (eventId: string, userId: string) => {
       },
     });
   } catch (err: any) {
-    console.log(err);
+    console.log(10, err);
 
     if (err.code === "P2002") {
       console.log("User already registered for this event");
@@ -195,6 +220,6 @@ export const deleteRegistration = async (id: string) => {
   try {
     await prisma.registration.delete({ where: { id } });
   } catch (err) {
-    console.log(err);
+    console.log(11, err);
   }
 };

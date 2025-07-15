@@ -10,7 +10,7 @@ const NavbarLink: FC<LinkProps & HTMLProps<HTMLAnchorElement>> = ({
   ...rest
 }) => {
   const path = usePathname();
-  console.log(1, path, href);
+  console.log(5, path, href);
   return (
     <Link
       href={href}

@@ -21,7 +21,7 @@ const UpdateEventForm = ({ event }: { event: createEventSchemaType }) => {
     resolver: zodResolver(createEventSchema),
     defaultValues: event,
   });
-  console.log(event);
+  console.log(3, event);
 
   useEffect(() => {
     register("image", { required: "Image is required." });
@@ -31,7 +31,7 @@ const UpdateEventForm = ({ event }: { event: createEventSchemaType }) => {
     if (event.image instanceof Blob) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        // @ts-ignore
+        //@ts-expect-error
         setValue("image", reader.result, { shouldValidate: true });
       };
       reader.readAsDataURL(event.image);
