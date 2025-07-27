@@ -8,7 +8,6 @@ import NavbarLink from "src/components/layout/NavbarLink";
 async function Navbar() {
   const { userName } = await verifySession();
 
-  console.log(4, userName);
   const handleLogout = async () => {
     "use server";
     await deleteSession();

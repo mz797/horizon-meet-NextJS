@@ -74,7 +74,6 @@ export const createEvent = async (event: {
       image: event.image as string,
       date: new Date(event.date),
       organizerId: userId,
-      organizer: { connect: { id: userId } },
     },
   });
 

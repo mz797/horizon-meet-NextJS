@@ -57,8 +57,8 @@ const Pagination = ({
           <option value="100">100</option>
           <option value="1000">1,000</option>
           <option value="10000">10,000</option>
-          <option value="100000">100,000</option>
-          <option value="1000000">1,000,000</option>
+          <option value="25000">25,000</option>
+          <option value="50000">50,000</option>
         </select>
       </div>
 
